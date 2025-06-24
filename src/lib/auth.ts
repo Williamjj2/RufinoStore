@@ -2,31 +2,7 @@ import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
 import { prisma } from './db'
-
-// Mock users for development without database
-const mockUsers = [
-  {
-    id: '1',
-    email: 'admin@rufino.com',
-    password: 'admin123',
-    name: 'Admin Rufino',
-    role: 'admin'
-  },
-  {
-    id: '2', 
-    email: 'user@rufino.com',
-    password: 'user123',
-    name: 'Usuário Teste',
-    role: 'user'
-  },
-  {
-    id: '3',
-    email: 'creator@rufino.com', 
-    password: 'creator123',
-    name: 'Creator Teste',
-    role: 'creator'
-  }
-]
+import { mockUsers } from './mock-data'
 
 export const authOptions: NextAuthOptions = {
   providers: [

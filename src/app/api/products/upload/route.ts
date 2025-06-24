@@ -92,9 +92,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Configurar tamanho máximo da requisição
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-} 
+// Route configuration for Next.js 13+ App Router
+export const runtime = 'nodejs'
+export const maxDuration = 30 // 30 seconds max for file uploads 
