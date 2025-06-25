@@ -1,6 +1,10 @@
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { redirect } from 'next/navigation'
+import DashboardStats from '@/components/dashboard/DashboardStats'
+import SalesChart from '@/components/dashboard/SalesChart'
+import RecentSales from '@/components/dashboard/RecentSales'
+import ProductPerformance from '@/components/dashboard/ProductPerformance'
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions)
@@ -18,10 +22,10 @@ export default async function DashboardPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
-                  Bem-vindo ao RufinoStore! 👋
+                  Dashboard - RufinoStore 📊
                 </h1>
                 <p className="mt-1 text-sm text-gray-600">
-                  Seu painel de controle para vendas digitais
+                  Acompanhe suas vendas e performance
                 </p>
               </div>
               <div className="text-right">
@@ -36,91 +40,20 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Development Notice */}
-        <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-md p-4">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <span className="text-yellow-400 text-lg">🚧</span>
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-yellow-800">
-                Modo Desenvolvimento Ativo
-              </h3>
-              <p className="mt-2 text-sm text-yellow-700">
-                Você está usando autenticação mock. Nenhum banco de dados é necessário. 
-                As funcionalidades de produtos e vendas serão implementadas em breve.
-              </p>
-            </div>
+        {/* Dashboard Stats Cards */}
+        <DashboardStats />
+
+        {/* Chart and Recent Sales Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          <div className="lg:col-span-2">
+            <SalesChart />
           </div>
         </div>
 
-        {/* Quick Stats */}
-        <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-3">
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-indigo-500 rounded-md flex items-center justify-center">
-                    <span className="text-white text-sm font-medium">📦</span>
-                  </div>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
-                      Produtos
-                    </dt>
-                    <dd className="text-lg font-medium text-gray-900">
-                      0
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
-                    <span className="text-white text-sm font-medium">💰</span>
-                  </div>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
-                      Vendas
-                    </dt>
-                    <dd className="text-lg font-medium text-gray-900">
-                      R$ 0,00
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white overflow-hidden shadow rounded-lg">
-            <div className="p-5">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <div className="w-8 h-8 bg-purple-500 rounded-md flex items-center justify-center">
-                    <span className="text-white text-sm font-medium">👥</span>
-                  </div>
-                </div>
-                <div className="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">
-                      Clientes
-                    </dt>
-                    <dd className="text-lg font-medium text-gray-900">
-                      0
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-          </div>
+        {/* Recent Sales and Product Performance Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          <RecentSales />
+          <ProductPerformance />
         </div>
 
         {/* Quick Actions */}
@@ -168,34 +101,37 @@ export default async function DashboardPage() {
                 </div>
               </a>
 
-              <div className="relative group bg-white p-6 rounded-lg border border-gray-200 opacity-50">
+              <a
+                href="/products"
+                className="relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-green-500 rounded-lg border border-gray-300 hover:border-gray-400"
+              >
                 <div>
-                  <span className="rounded-lg inline-flex p-3 bg-gray-50 text-gray-400">
+                  <span className="rounded-lg inline-flex p-3 bg-green-50 text-green-600 group-hover:bg-green-100">
                     <span className="text-xl">💳</span>
                   </span>
                 </div>
                 <div className="mt-4">
-                  <h4 className="text-sm font-medium text-gray-500">
-                    Pagamentos (Em breve)
+                  <h4 className="text-sm font-medium text-gray-900">
+                    Sistema de Pagamento
                   </h4>
-                  <p className="mt-1 text-sm text-gray-400">
-                    Configure Stripe/Mercado Pago
+                  <p className="mt-1 text-sm text-gray-500">
+                    Stripe & MercadoPago ativos
                   </p>
                 </div>
-              </div>
+              </a>
 
-              <div className="relative group bg-white p-6 rounded-lg border border-gray-200 opacity-50">
+              <div className="relative group bg-white p-6 rounded-lg border border-green-200 bg-green-50">
                 <div>
-                  <span className="rounded-lg inline-flex p-3 bg-gray-50 text-gray-400">
+                  <span className="rounded-lg inline-flex p-3 bg-green-100 text-green-600">
                     <span className="text-xl">📊</span>
                   </span>
                 </div>
                 <div className="mt-4">
-                  <h4 className="text-sm font-medium text-gray-500">
-                    Analytics (Em breve)
+                  <h4 className="text-sm font-medium text-green-700">
+                    Analytics Ativo
                   </h4>
-                  <p className="mt-1 text-sm text-gray-400">
-                    Acompanhe suas vendas
+                  <p className="mt-1 text-sm text-green-600">
+                    Dashboard completo funcionando
                   </p>
                 </div>
               </div>
