@@ -6,9 +6,8 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 // Modelo de Usuário (Criadores)
@@ -44,8 +43,8 @@ model Product {
   user_id         String
   title           String
   description     String?
-  price_brl       Decimal?  @db.Decimal(10, 2)
-  price_usd       Decimal?  @db.Decimal(10, 2)
+  price_brl       Decimal?
+  price_usd       Decimal?
   file_url        String
   cover_image_url String?
   is_active       Boolean   @default(true)
@@ -70,13 +69,13 @@ model Sale {
   user_id           String        // vendedor
   buyer_email       String
   buyer_name        String?
-  amount            Decimal       @db.Decimal(10, 2)
+  amount            Decimal
   currency          String        // BRL ou USD
   payment_method    String        // stripe ou mercadopago
-  payment_status    PaymentStatus @default(PENDING)
+  payment_status    String        @default("PENDING")
   stripe_payment_id String?
   mp_payment_id     String?
-  commission_amount Decimal       @db.Decimal(10, 2)
+  commission_amount Decimal
   created_at        DateTime      @default(now())
   
   // Relacionamentos
@@ -92,13 +91,8 @@ model Sale {
   @@map("sales")
 }
 
-// Enum para status de pagamento
-enum PaymentStatus {
-  PENDING
-  PAID
-  FAILED
-  REFUNDED
-}
+// Status de pagamento como String (SQLite não suporta enums)
+// Valores permitidos: "PENDING", "PAID", "FAILED", "REFUNDED"
 
 // Modelo de Administrador
 model Admin {

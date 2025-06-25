@@ -67,5 +67,8 @@
     "eslint": "8.55.0",
     "eslint-config-next": "14.0.4",
     "tsx": "4.7.0"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   }
 }
