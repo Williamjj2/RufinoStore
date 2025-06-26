@@ -3,13 +3,37 @@ import { NextResponse } from 'next/server'
 
 export default withAuth(
   function middleware(req) {
-    // Token existe, permitir acesso
+    const token = req.nextauth.token
+    
+    // Check for admin routes
+    if (req.nextUrl.pathname.startsWith('/admin')) {
+      if (token?.role !== 'admin') {
+        return NextResponse.redirect(new URL('/dashboard', req.url))
+      }
+    }
+
+    // Check for API admin routes
+    if (req.nextUrl.pathname.startsWith('/api/admin')) {
+      if (token?.role !== 'admin') {
+        return NextResponse.json(
+          { error: 'Acesso negado' },
+          { status: 403 }
+        )
+      }
+    }
+
     return NextResponse.next()
   },
   {
     callbacks: {
       authorized: ({ token, req }) => {
-        // Verificar se o usuário está autenticado
+        // All protected routes require authentication
+        if (req.nextUrl.pathname.startsWith('/admin') || 
+            req.nextUrl.pathname.startsWith('/api/admin')) {
+          return !!token && token.role === 'admin'
+        }
+        
+        // Other protected routes just need authentication
         return !!token
       }
     },
@@ -24,8 +48,10 @@ export const config = {
   matcher: [
     '/dashboard/:path*',
     '/products/:path*',
+    '/settings/:path*',
     '/admin/:path*',
     '/api/products/:path*',
     '/api/admin/:path*',
+    '/api/user/:path*',
   ]
 } 

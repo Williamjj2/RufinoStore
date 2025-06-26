@@ -9,6 +9,12 @@ declare module 'next-auth' {
       email: string
       name: string
       role: string
+      username?: string
+      bio?: string
+      phone?: string
+      avatar_url?: string
+      stripe_account_id?: string
+      mercadopago_access_token?: string
     }
   }
 
@@ -17,6 +23,12 @@ declare module 'next-auth' {
     email: string
     name: string
     role: string
+    username?: string
+    bio?: string
+    phone?: string
+    avatar_url?: string
+    stripe_account_id?: string
+    mercadopago_access_token?: string
   }
 }
 

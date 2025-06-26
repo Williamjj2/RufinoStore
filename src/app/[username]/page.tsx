@@ -1,6 +1,13 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getUserProducts } from '@/lib/mock-data'
+import { prisma } from '@/lib/db'
+import { TEMPLATES, DEFAULT_SETTINGS } from '@/types/templates'
+import { AuroraTemplate } from '@/components/templates/aurora/AuroraTemplate'
+import { BentoTemplate } from '@/components/templates/bento/BentoTemplate'
+import { SpotlightTemplate } from '@/components/templates/spotlight/SpotlightTemplate'
+import { CanvasTemplate } from '@/components/templates/canvas/CanvasTemplate'
+import { MinimalTemplate } from '@/components/templates/minimal/MinimalTemplate'
 import UserStore from '@/components/public/UserStore'
 
 interface PageProps {
@@ -9,63 +16,199 @@ interface PageProps {
 
 // Generate metadata for SEO
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { username } = params
-  
-  try {
-    // Use mock data directly instead of API call for now
-    const result = getUserProducts(username)
-
-    if (!result) {
-      return {
-        title: 'Usuário não encontrado - RufinoStore',
-        description: 'Este usuário não foi encontrado na plataforma RufinoStore.'
+  const user = await prisma.user.findUnique({
+    where: { username: params.username },
+    include: {
+      products: {
+        where: { is_active: true },
+        orderBy: { created_at: "desc" },
+        take: 1
       }
     }
+  });
 
-    const { user, products } = result
-
+  if (!user) {
     return {
-      title: `${user.name} - Produtos Digitais | RufinoStore`,
-      description: user.bio || `Confira os produtos digitais de ${user.name}. ${products.length} produtos disponíveis.`,
-      openGraph: {
-        title: `Loja de ${user.name}`,
-        description: user.bio || `Confira os produtos digitais de ${user.name}`,
-        images: user.avatar_url ? [user.avatar_url] : [],
-        type: 'website',
-      },
-      twitter: {
-        card: 'summary_large_image',
-        title: `Loja de ${user.name}`,
-        description: user.bio || `Confira os produtos digitais de ${user.name}`,
-        images: user.avatar_url ? [user.avatar_url] : [],
-      }
-    }
-  } catch (error) {
-    return {
-      title: 'Erro - RufinoStore',
-      description: 'Ocorreu um erro ao carregar esta página.'
-    }
+      title: "Loja não encontrada",
+      description: "Esta loja não existe ou foi removida."
+    };
   }
+
+  const featuredProduct = user.products[0];
+  const baseUrl = process.env.NEXTAUTH_URL || "https://bubastore.com";
+  const storeUrl = `${baseUrl}/${user.username}`;
+  
+  return {
+    title: `${user.name} - Loja Digital`,
+    description: user.bio || `Confira os produtos digitais de ${user.name}`,
+    keywords: [
+      user.name,
+      "loja digital",
+      "produtos digitais",
+      "criador de conteúdo",
+      user.username
+    ],
+    authors: [{ name: user.name }],
+    creator: user.name,
+    publisher: "BubaStore",
+    openGraph: {
+      title: `${user.name} - Loja Digital`,
+      description: user.bio || `Confira os produtos digitais de ${user.name}`,
+      url: storeUrl,
+      siteName: "BubaStore",
+      images: [
+        {
+          url: user.avatar_url || "/default-avatar.jpg",
+          width: 1200,
+          height: 630,
+          alt: `${user.name} - Loja Digital`,
+        },
+        ...(featuredProduct ? [{
+          url: featuredProduct.cover_image_url || "/default-product.jpg",
+          width: 1200,
+          height: 630,
+          alt: featuredProduct.title,
+        }] : [])
+      ],
+      locale: "pt_BR",
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${user.name} - Loja Digital`,
+      description: user.bio || `Confira os produtos digitais de ${user.name}`,
+      creator: `@${user.username}`,
+      images: [user.avatar_url || "/default-avatar.jpg"],
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
+    verification: {
+      google: process.env.GOOGLE_VERIFICATION,
+    },
+    alternates: {
+      canonical: storeUrl,
+    },
+  };
 }
 
 export default async function UserStorePage({ params }: PageProps) {
   const { username } = params
   
   try {
-    // Use mock data directly for now to avoid API call issues
-    const result = getUserProducts(username)
+    // Get user data from database
+    let user;
+    let products;
+    
+    try {
+      // Fetch user and products from database
+      user = await prisma.user.findUnique({
+        where: { username: username },
+        include: {
+          products: {
+            where: { is_active: true },
+            orderBy: { created_at: 'desc' }
+          }
+        }
+      });
 
-    if (!result) {
-      notFound()
+      if (!user) {
+        notFound()
+      }
+
+      products = user.products;
+    } catch (error) {
+      console.log('Database not available, falling back to mock data');
+      // Fallback to mock data if database is not available
+      const result = getUserProducts(username)
+      if (!result) {
+        notFound()
+      }
+      user = result.user;
+      products = result.products;
     }
 
-    const data = {
-      user: result.user,
-      products: result.products,
-      total_products: result.products.length
+    // Get user store settings
+    let storeSettings;
+    try {
+      storeSettings = await prisma.userStoreSettings.findFirst({
+        where: {
+          user: {
+            username: username
+          }
+        }
+      });
+    } catch (error) {
+      console.log('Database not available, using default settings');
+      storeSettings = null;
     }
 
-    return <UserStore initialData={data} />
+    // Use default settings if not found
+    if (!storeSettings) {
+      storeSettings = {
+        template_id: DEFAULT_SETTINGS.template_id,
+        primary_color: DEFAULT_SETTINGS.primary_color,
+        accent_color: DEFAULT_SETTINGS.accent_color,
+        background_color: DEFAULT_SETTINGS.background_color
+      };
+    }
+
+    // Prepare template props
+    const templateProps = {
+      user: {
+        id: user.id,
+        name: user.name,
+        username: user.username,
+        bio: user.bio || '',
+        avatar_url: user.avatar_url || ''
+      },
+      products: products.map((product: any) => ({
+        id: product.id,
+        title: product.title,
+        description: product.description || '',
+        price_brl: Number(product.price_brl || 0),
+        price_usd: Number(product.price_usd || 0),
+        cover_image_url: product.cover_image_url || product.cover_url,
+        is_active: true
+      })),
+      settings: {
+        primary_color: storeSettings.primary_color,
+        accent_color: storeSettings.accent_color,
+        background_color: storeSettings.background_color
+      },
+      salesCount: Math.floor(Math.random() * 100) + 10, // Mock sales count
+      isPreview: false
+    };
+
+    // Render appropriate template
+    switch (storeSettings.template_id) {
+      case 'aurora':
+        return <AuroraTemplate {...templateProps} />;
+      case 'bento':
+        return <BentoTemplate {...templateProps} />;
+      case 'spotlight':
+        return <SpotlightTemplate {...templateProps} />;
+      case 'canvas':
+        return <CanvasTemplate {...templateProps} />;
+      case 'minimal':
+        return <MinimalTemplate {...templateProps} />;
+      default:
+        // Fallback to original UserStore for minimal template or unknown templates
+        const data = {
+          user: user,
+          products: products,
+          total_products: products.length
+        };
+        return <UserStore initialData={data} />;
+    }
   } catch (error) {
     console.error('Error in UserStorePage:', error)
     notFound()

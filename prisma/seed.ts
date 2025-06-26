@@ -25,120 +25,187 @@ async function main() {
 
   console.log('✅ Admin criado:', admin.email)
 
-  // Criar usuário de teste
-  const testUserEmail = 'test@rufinostore.com'
-  const testUserPassword = 'test123456'
+  // Criar loja modelo do Buba Rufino
+  const bubaEmail = 'buba@rufinostore.com'
+  const bubaPassword = 'buba123456'
 
-  const hashedUserPassword = await bcrypt.hash(testUserPassword, 10)
+  const hashedBubaPassword = await bcrypt.hash(bubaPassword, 10)
 
-  const testUser = await prisma.user.upsert({
-    where: { email: testUserEmail },
+  const bubaUser = await prisma.user.upsert({
+    where: { email: bubaEmail },
     update: {},
     create: {
-      email: testUserEmail,
-      password_hash: hashedUserPassword,
-      name: 'Usuário Teste',
-      username: 'usuario_teste',
-      bio: 'Conta de teste para desenvolvimento',
+      email: bubaEmail,
+      password_hash: hashedBubaPassword,
+      name: 'Buba Rufino',
+      username: 'bubarufino',
+      bio: '📸 Fotógrafa profissional | 💰 Marketing digital | 🎯 Ensino criadores a monetizarem | Fort Lauderdale 🌴',
+      avatar_url: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=800&h=800&fit=crop&crop=face&auto=format&q=90',
       is_active: true,
     },
   })
 
-  console.log('✅ Usuário de teste criado:', testUser.email)
+  console.log('✅ Buba Rufino criado:', bubaUser.email)
 
-  // Criar produtos de teste
-  const products = await Promise.all([
+  // Criar configurações de loja para o Buba Rufino
+  const storeSettings = await prisma.userStoreSettings.upsert({
+    where: { user_id: bubaUser.id },
+    update: {},
+    create: {
+      user_id: bubaUser.id,
+      template_id: 'minimal', // Template limpo e legível estilo Stan Store
+      primary_color: '#3B82F6', // Azul moderno
+      accent_color: '#1D4ED8',  // Azul mais escuro
+      background_color: '#FFFFFF', // Fundo branco limpo
+    },
+  })
+
+  console.log('✅ Configurações de loja criadas para Buba')
+
+  // Criar 5 produtos focados de Buba Rufino
+  const bubaProducts = await Promise.all([
     prisma.product.create({
       data: {
-        user_id: testUser.id,
-        title: 'E-book de Marketing Digital',
-        description: 'Aprenda as melhores estratégias de marketing digital para alavancar seu negócio',
-        price_brl: 47.90,
-        price_usd: 9.90,
-        file_url: 'https://example.com/ebook-marketing.pdf',
-        cover_image_url: 'https://via.placeholder.com/300x400',
+        user_id: bubaUser.id,
+        title: '📸 Curso Completo de Fotografia Profissional',
+        description: 'Aprenda todas as técnicas que uso para criar fotos incríveis que vendem. Do básico ao avançado, com lighting, composição e edição no Lightroom.',
+        price_brl: 497.00,
+        price_usd: 97.00,
+        file_url: 'https://example.com/curso-fotografia-buba',
+        cover_image_url: 'https://images.unsplash.com/photo-1554048612-b6a482b6dc35?w=500&h=600&fit=crop&auto=format&q=80',
         is_active: true,
       },
     }),
     prisma.product.create({
       data: {
-        user_id: testUser.id,
-        title: 'Curso de Programação Web',
-        description: 'Do zero ao profissional em desenvolvimento web',
-        price_brl: 197.00,
-        price_usd: 39.90,
-        file_url: 'https://example.com/curso-web',
-        cover_image_url: 'https://via.placeholder.com/300x400',
+        user_id: bubaUser.id,
+        title: '💰 Sistema Make Money With Buba',
+        description: 'Meu método completo para monetizar suas habilidades online. Como transformei minha paixão por fotografia em um negócio de 6 figuras.',
+        price_brl: 997.00,
+        price_usd: 197.00,
+        file_url: 'https://example.com/make-money-sistema',
+        cover_image_url: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=500&h=600&fit=crop&auto=format&q=80',
         is_active: true,
       },
     }),
     prisma.product.create({
       data: {
-        user_id: testUser.id,
-        title: 'Templates de Design',
-        description: 'Pack com 50 templates profissionais para seus projetos',
+        user_id: bubaUser.id,
+        title: '🎨 Pack de Presets Lightroom - Signature Style',
+        description: '25 presets exclusivos que uso em todos os meus trabalhos. Transforme suas fotos com o estilo único que me tornou conhecido em Fort Lauderdale.',
         price_brl: 97.00,
         price_usd: 19.90,
-        file_url: 'https://example.com/templates.zip',
-        cover_image_url: 'https://via.placeholder.com/300x400',
+        file_url: 'https://example.com/presets-lightroom',
+        cover_image_url: 'https://images.unsplash.com/photo-1542038784456-1ea8e4d40407?w=500&h=600&fit=crop&auto=format&q=80',
+        is_active: true,
+      },
+    }),
+    prisma.product.create({
+      data: {
+        user_id: bubaUser.id,
+        title: '📱 Mentoria Instagram para Fotógrafos',
+        description: 'Como consegui +100k seguidores autênticos e clientes premium usando estratégias específicas para fotógrafos. Inclui templates e cronograma de posts.',
+        price_brl: 297.00,
+        price_usd: 59.90,
+        file_url: 'https://example.com/mentoria-instagram',
+        cover_image_url: 'https://images.unsplash.com/photo-1611262588024-d12430b98920?w=500&h=600&fit=crop&auto=format&q=80',
+        is_active: true,
+      },
+    }),
+    prisma.product.create({
+      data: {
+        user_id: bubaUser.id,
+        title: '🔥 E-book: Segredos da Fotografia Comercial',
+        description: 'Tudo que aprendi fotografando para marcas em Miami e Fort Lauderdale. Contratos, preços, negociação e como fechar clientes de alto valor.',
+        price_brl: 147.00,
+        price_usd: 29.90,
+        file_url: 'https://example.com/ebook-fotografia-comercial',
+        cover_image_url: 'https://images.unsplash.com/photo-1432888622747-4eb9a8efeb07?w=500&h=600&fit=crop&auto=format&q=80',
         is_active: true,
       },
     }),
   ])
 
-  console.log(`✅ ${products.length} produtos criados`)
+  console.log(`✅ ${bubaProducts.length} produtos de Buba Rufino criados`)
 
-  // Criar algumas vendas de teste
-  const sales = await Promise.all([
+  // Criar algumas vendas realistas para Buba
+  const bubaSales = await Promise.all([
     prisma.sale.create({
       data: {
-        product_id: products[0].id,
-        user_id: testUser.id,
-        buyer_email: 'comprador1@example.com',
-        buyer_name: 'João Silva',
-        amount: 47.90,
+        product_id: bubaProducts[0].id, // Curso de Fotografia
+        user_id: bubaUser.id,
+        buyer_email: 'maria.photographer@gmail.com',
+        buyer_name: 'Maria Silva',
+        amount: 497.00,
         currency: 'BRL',
         payment_method: 'stripe',
         payment_status: 'PAID',
-        stripe_payment_id: 'pi_test_123456',
-        commission_amount: 4.79, // 10% de comissão
+        stripe_payment_id: 'pi_buba_123456',
+        commission_amount: 49.70,
       },
     }),
     prisma.sale.create({
       data: {
-        product_id: products[1].id,
-        user_id: testUser.id,
-        buyer_email: 'comprador2@example.com',
-        buyer_name: 'Maria Santos',
-        amount: 197.00,
+        product_id: bubaProducts[1].id, // Make Money System
+        user_id: bubaUser.id,
+        buyer_email: 'carlos.creator@hotmail.com',
+        buyer_name: 'Carlos Oliveira',
+        amount: 997.00,
         currency: 'BRL',
         payment_method: 'mercadopago',
         payment_status: 'PAID',
-        mp_payment_id: 'mp_test_789012',
-        commission_amount: 19.70, // 10% de comissão
+        mp_payment_id: 'mp_buba_789012',
+        commission_amount: 99.70,
       },
     }),
     prisma.sale.create({
       data: {
-        product_id: products[0].id,
-        user_id: testUser.id,
-        buyer_email: 'comprador3@example.com',
-        buyer_name: 'Pedro Costa',
-        amount: 47.90,
+        product_id: bubaProducts[2].id, // Presets
+        user_id: bubaUser.id,
+        buyer_email: 'ana.photos@yahoo.com',
+        buyer_name: 'Ana Costa',
+        amount: 97.00,
         currency: 'BRL',
         payment_method: 'stripe',
-        payment_status: 'PENDING',
-        commission_amount: 4.79,
+        payment_status: 'PAID',
+        commission_amount: 9.70,
+      },
+    }),
+    prisma.sale.create({
+      data: {
+        product_id: bubaProducts[3].id, // Mentoria Instagram
+        user_id: bubaUser.id,
+        buyer_email: 'joao.marketing@gmail.com',
+        buyer_name: 'João Santos',
+        amount: 297.00,
+        currency: 'BRL',
+        payment_method: 'stripe',
+        payment_status: 'PAID',
+        commission_amount: 29.70,
+      },
+    }),
+    prisma.sale.create({
+      data: {
+        product_id: bubaProducts[4].id, // E-book
+        user_id: bubaUser.id,
+        buyer_email: 'luciana.business@outlook.com',
+        buyer_name: 'Luciana Ferreira',
+        amount: 147.00,
+        currency: 'BRL',
+        payment_method: 'mercadopago',
+        payment_status: 'PAID',
+        commission_amount: 14.70,
       },
     }),
   ])
 
-  console.log(`✅ ${sales.length} vendas criadas`)
+  console.log(`✅ ${bubaSales.length} vendas de Buba Rufino criadas`)
 
   console.log('🎉 Seed concluído com sucesso!')
   console.log('\n📝 Credenciais de acesso:')
   console.log(`Admin: ${adminEmail} / ${adminPassword}`)
-  console.log(`User: ${testUserEmail} / ${testUserPassword}`)
+  console.log(`Buba Rufino: ${bubaEmail} / ${bubaPassword}`)
+  console.log('\n🔗 Loja modelo: http://localhost:3000/bubarufino')
 }
 
 main()

@@ -35,9 +35,23 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'i.pravatar.cc',
+        port: '',
+        pathname: '/**',
+      },
+    ],
+    domains: [
+      'images.unsplash.com',
+      'via.placeholder.com',
+      'cdn.pixabay.com',
+      'images.pexels.com',
+      'source.unsplash.com',
+      'picsum.photos',
+      'res.cloudinary.com'
     ],
   },
-
 }
 
 module.exports = nextConfig 

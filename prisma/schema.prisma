@@ -29,6 +29,7 @@ model User {
   // Relacionamentos
   products                Product[]
   sales                   Sale[]
+  store_settings          UserStoreSettings?
   
   // Índices para otimização
   @@index([email])
@@ -93,6 +94,26 @@ model Sale {
 
 // Status de pagamento como String (SQLite não suporta enums)
 // Valores permitidos: "PENDING", "PAID", "FAILED", "REFUNDED"
+
+// Modelo de Configurações de Loja
+model UserStoreSettings {
+  id               String   @id @default(cuid())
+  user_id          String   @unique
+  template_id      String   @default("minimal")
+  primary_color    String   @default("#000000")
+  accent_color     String   @default("#3B82F6")
+  background_color String   @default("#FFFFFF")
+  custom_css       String?
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+  
+  // Relacionamentos
+  user             User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  
+  // Índices para otimização
+  @@index([user_id])
+  @@map("user_store_settings")
+}
 
 // Modelo de Administrador
 model Admin {
